@@ -1,15 +1,20 @@
 package pkg
 
-import "golang.org/x/net/websocket"
-
+import "github.com/gorilla/websocket"
 
 type Room struct{
-    ID      int
+    ID      string 
     Client  []Client 
 }
 
 
 type Client struct{
     conn    *websocket.Conn
-    RoomId  int 
+    RoomId  string 
+}
+
+
+type Message struct{
+    RoomId string
+    Text   string
 }
