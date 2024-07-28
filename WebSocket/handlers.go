@@ -14,6 +14,7 @@ import (
 type Handler struct{
     Upgrader    *websocket.Upgrader
     Clients     map[Client]bool
+    broadcast   chan Message
 }
 
 func (h *Handler) CreateRoom(w http.ResponseWriter, r *http.Request){
@@ -23,14 +24,7 @@ func (h *Handler) CreateRoom(w http.ResponseWriter, r *http.Request){
     }
     room.ID = len(Rooms) + 1
     Rooms = append(Rooms, room)
-    //Broadcasting the newly created room
-    for c := range h.Clients{
-        err := c.conn.WriteJSON(room)
-        if err != nil {
-            delete(h.Clients, c)
-            errs.ConnError(w)
-        }
-    }
+    log.Println(Rooms)
 }
 
 
@@ -45,42 +39,38 @@ func (h *Handler) JoinRoom(w http.ResponseWriter, r *http.Request)  {
     }
     
     conn, err := h.Upgrader.Upgrade(w, r, nil)
+    if err != nil {
+        w.WriteHeader(http.StatusBadRequest)
+        return 
+    }
     client := Client{
         conn: conn,
+        RoomId: id,
     }
     h.Clients[client] = true 
 
-    log.Println("Client has connected: ", conn.RemoteAddr())
-    if err != nil{
-        errs.ConnError(w)
-    }
-    
-    
-
-    client.RoomId = id 
-    
-
-    go h.readMessage(&client)
-    go h.writeMesages()
+    h.readMessage(&client)
 
 }
 
-
-func (h *Handler) writeMesages(){
-    msg := <-MsgChan
-    for {
+func (h *Handler) WriteMesages(){
+    for msg := range h.broadcast{
+        log.Println("I am about to be written",msg)
         for cl := range h.Clients{
-        
+            log.Println("Client's id:", cl.RoomId)
+            log.Println("Message's  id:", msg.RoomId) 
             if cl.RoomId == msg.RoomId{
                 err := cl.conn.WriteJSON(msg)
                 if err != nil{
+                    log.Println("Apperantly we have a problem")
                     delete(h.Clients, cl)
+                    return 
                 }
+                log.Println("We have written that mf")
             }
         } 
     }
 }
-
 
 func (h *Handler) readMessage(c *Client) {
     if c.RoomId != 0 {
@@ -89,9 +79,13 @@ func (h *Handler) readMessage(c *Client) {
             err := c.conn.ReadJSON(&msg)
             if err != nil {
                 delete(h.Clients, *c)
+                return 
             }
+            log.Println("msg has been read",msg)
             msg.RoomId = c.RoomId
-            MsgChan <- msg
+            log.Println("id has been set for the message")
+            h.broadcast <- msg 
+            log.Println("After writing to the channel")
 
         }
     }
