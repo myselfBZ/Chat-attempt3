@@ -1,4 +1,4 @@
-package pkg
+package ws 
 
 import (
 	"net/http"
@@ -7,13 +7,12 @@ import (
 )
 
 var (
-	MsgChan = make(chan Message)
-	H       *Handler
+	MsgChan chan Message
+    Rooms   []Room 
 )
 
-func HandlerInit() {
-    if H == nil{
-        H = &Handler{
+func NewHandler() *Handler {
+    return &Handler{
             Clients:  make(map[Client]bool),
             Upgrader: &websocket.Upgrader{
                 CheckOrigin: func(r *http.Request)bool{
@@ -21,6 +20,5 @@ func HandlerInit() {
                 },
             },
         }
-    }
-    return 
+
 }

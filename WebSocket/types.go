@@ -1,20 +1,20 @@
-package pkg
+package ws 
 
 import "github.com/gorilla/websocket"
 
 type Room struct{
-    ID      string 
-    Client  []Client 
+    Name    string  `json:"name"`
+    ID      int  `json:"id"`
 }
 
 
 type Client struct{
     conn    *websocket.Conn
-    RoomId  string 
+    RoomId  int 
 }
 
 
 type Message struct{
-    RoomId string
-    Text   string
+    RoomId  int 
+    Text   string   `json:"text"`
 }
