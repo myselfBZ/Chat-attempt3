@@ -7,7 +7,6 @@ import (
 )
 
 var (
-	MsgChan chan Message
     Rooms   []Room 
 )
 
@@ -19,6 +18,7 @@ func NewHandler() *Handler {
                     return true
                 },
             },
+            broadcast: make(chan Message),
         }
 
 }
