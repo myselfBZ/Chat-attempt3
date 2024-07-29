@@ -51,7 +51,7 @@ func (h *Handler) JoinRoom(w http.ResponseWriter, r *http.Request)  {
 
 }
 
-func ListRooms(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) ListRooms(w http.ResponseWriter, r *http.Request) {
     
     json.NewEncoder(w).Encode(Rooms) 
 

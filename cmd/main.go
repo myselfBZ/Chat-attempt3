@@ -14,7 +14,7 @@ func init()  {
 func main()  {
     h := ws.NewHandler()
     mux := http.NewServeMux()
-    mux.HandleFunc("/rooms", ws.ListRooms)
+    mux.HandleFunc("/rooms", h.ListRooms)
     mux.HandleFunc("/rooms/{roomId}", h.JoinRoom)
     mux.HandleFunc("POST /rooms", h.CreateRoom)
     go h.WriteMesages()
