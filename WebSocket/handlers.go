@@ -2,7 +2,6 @@ package ws
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"strconv"
 
@@ -60,18 +59,13 @@ func ListRooms(w http.ResponseWriter, r *http.Request) {
 
 func (h *Handler) WriteMesages(){
     for msg := range h.broadcast{
-        log.Println("I am about to be written",msg)
         for cl := range h.Clients{
-            log.Println("Client's id:", cl.RoomId)
-            log.Println("Message's  id:", msg.RoomId) 
             if cl.RoomId == msg.RoomId{
                 err := cl.conn.WriteJSON(msg)
                 if err != nil{
-                    log.Println("Apperantly we have a problem")
                     delete(h.Clients, cl)
                     return 
                 }
-                log.Println("We have written that mf")
             }
         } 
     }
@@ -86,11 +80,8 @@ func (h *Handler) readMessage(c *Client) {
                 delete(h.Clients, *c)
                 return 
             }
-            log.Println("msg has been read",msg)
             msg.RoomId = c.RoomId
-            log.Println("id has been set for the message")
             h.broadcast <- msg 
-            log.Println("After writing to the channel")
 
         }
     }
