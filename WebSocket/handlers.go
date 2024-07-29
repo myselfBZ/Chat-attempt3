@@ -24,7 +24,6 @@ func (h *Handler) CreateRoom(w http.ResponseWriter, r *http.Request){
     }
     room.ID = len(Rooms) + 1
     Rooms = append(Rooms, room)
-    log.Println(Rooms)
 }
 
 
@@ -50,6 +49,12 @@ func (h *Handler) JoinRoom(w http.ResponseWriter, r *http.Request)  {
     h.Clients[client] = true 
 
     h.readMessage(&client)
+
+}
+
+func ListRooms(w http.ResponseWriter, r *http.Request) {
+    
+    json.NewEncoder(w).Encode(Rooms) 
 
 }
 
